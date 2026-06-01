@@ -13,6 +13,10 @@
     {
       "src": "prompt_instructions.md",
       "use": "@vercel/static"
+    },
+    {
+      "src": "favicon.png",
+      "use": "@vercel/static"
     }
   ]
 }
