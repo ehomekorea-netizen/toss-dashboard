@@ -78,7 +78,7 @@ module.exports = async (req, res) => {
         const topCategories = data.slice(0, 4).map(c => `${c.name} (${c.percent}%, ${c.total.toLocaleString()}원)`).join(', ');
         const prompt = `사용자의 이번 달 총 지출액은 ${totalAmount.toLocaleString()}원입니다. 지출 비중이 가장 높은 상위 4개 카테고리는 ${topCategories} 입니다. 당신은 친절하고 전문적인 재무 상담사입니다. 이 데이터를 바탕으로 사용자의 이번 달 소비 습관을 분석하고, 잘한 점과 개선할 점, 그리고 다음 달을 위한 절약 팁을 3~4문장으로 짧고 다정하게 요약해 주세요.`;
 
-        const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
         const systemInstruction = "당신은 최고의 재무 분석가입니다. 마크다운 기호를 쓰지말고 자연스러운 평문으로 작성하세요. ";
         const payload = {
