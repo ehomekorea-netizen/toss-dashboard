@@ -1,15 +1,18 @@
 {
   "version": 2,
-  "public": true,
   "cleanUrls": true,
-  "routes": [
+  "builds": [
     {
-      "src": "/api/analyze",
-      "dest": "/api/analyze.js"
+      "src": "api/analyze.js",
+      "use": "@vercel/node"
     },
     {
-      "src": "/(.*)",
-      "dest": "/$1"
+      "src": "index.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "prompt_instructions.md",
+      "use": "@vercel/static"
     }
   ]
 }
