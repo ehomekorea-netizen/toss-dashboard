@@ -80,9 +80,9 @@ module.exports = async (req, res) => {
 
         const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
+        const systemInstruction = "당신은 최고의 재무 분석가입니다. 마크다운 기호를 쓰지말고 자연스러운 평문으로 작성하세요. ";
         const payload = {
-            contents: [{ parts: [{ text: prompt }] }],
-            systemInstruction: { parts: [{ text: "당신은 최고의 재무 분석가입니다. 마크다운 기호를 쓰지말고 자연스러운 평문으로 작성하세요." }] }
+            contents: [{ parts: [{ text: systemInstruction + prompt }] }]
         };
 
         const result = await post(apiUrl, payload);
