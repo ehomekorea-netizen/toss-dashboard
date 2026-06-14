@@ -1,8 +1,7 @@
-// Vercel Serverless Function (api/analyze.js)
-// 이 백엔드 코드는 Vercel 서버에서 실행되며, API 키를 브라우저에 노출하지 않고 안전하게 보관합니다.
+// Netlify Serverless Function (netlify/functions/analyze.js)
 const https = require('https');
 
-// 모든 Node.js 버전에서 호환되는 native https 모듈 기반의 Promise POST 요청 함수
+// native https 모듈 기반의 Promise POST 요청 함수
 function post(url, payload) {
     return new Promise((resolve, reject) => {
         const urlObj = new URL(url);
@@ -46,39 +45,51 @@ function post(url, payload) {
     });
 }
 
-module.exports = async (req, res) => {
+exports.handler = async (event, context) => {
     // CORS 헤더 설정
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-    res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+    const headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
+        'Access-Control-Allow-Methods': 'GET,OPTIONS,PATCH,DELETE,POST,PUT'
+    };
 
-    if (req.method === 'OPTIONS') {
-        res.status(200).end();
-        return;
+    // OPTIONS preflight 요청 처리
+    if (event.httpMethod === 'OPTIONS') {
+        return {
+            statusCode: 200,
+            headers,
+            body: ''
+        };
     }
 
-    if (req.method !== 'POST') {
-        res.status(405).json({ error: 'Method Not Allowed' });
-        return;
+    if (event.httpMethod !== 'POST') {
+        return {
+            statusCode: 405,
+            headers,
+            body: JSON.stringify({ error: 'Method Not Allowed' })
+        };
     }
 
     try {
-        const { totalAmount, data } = req.body;
+        const { totalAmount, data } = JSON.parse(event.body);
         
-        // Vercel 환경 변수에서 안전하게 API 키 로드
+        // Netlify 환경 변수에서 안전하게 API 키 로드
         const apiKey = process.env.GEMINI_API_KEY;
 
         if (!apiKey) {
-            return res.status(500).json({ 
-                error: 'Vercel 대시보드에 GEMINI_API_KEY 환경변수가 설정되지 않았습니다.' 
-            });
+            return {
+                statusCode: 500,
+                headers,
+                body: JSON.stringify({ 
+                    error: 'Netlify 대시보드에 GEMINI_API_KEY 환경변수가 설정되지 않았습니다.' 
+                })
+            };
         }
 
         const topCategories = data.slice(0, 4).map(c => `${c.name} (${c.percent}%, ${c.total.toLocaleString()}원)`).join(', ');
         const prompt = `사용자의 이번 달 총 지출액은 ${totalAmount.toLocaleString()}원입니다. 지출 비중이 가장 높은 상위 4개 카테고리는 ${topCategories} 입니다. 당신은 친절하고 전문적인 재무 상담사입니다. 이 데이터를 바탕으로 사용자의 이번 달 소비 습관을 분석하고, 잘한 점과 개선할 점, 그리고 다음 달을 위한 절약 팁을 3~4문장으로 짧고 다정하게 요약해 주세요.`;
 
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`;
 
         const systemInstruction = "당신은 최고의 재무 분석가입니다. 마크다운 기호를 쓰지말고 자연스러운 평문으로 작성하세요. ";
         const payload = {
@@ -86,9 +97,18 @@ module.exports = async (req, res) => {
         };
 
         const result = await post(apiUrl, payload);
-        res.status(200).json(result);
+        
+        return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify(result)
+        };
     } catch (error) {
         console.error('Serverless Function Error:', error);
-        res.status(500).json({ error: error.message || 'Internal Server Error' });
+        return {
+            statusCode: 500,
+            headers,
+            body: JSON.stringify({ error: error.message || 'Internal Server Error' })
+        };
     }
 };
