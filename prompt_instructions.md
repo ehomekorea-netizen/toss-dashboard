@@ -1,4 +1,4 @@
-# [SKILL] 영상 데이터 전수 조사 및 토스형 Canvas 실시간 구현 (Vercel 배포 규격 통합본)
+# [SKILL] 영상 데이터 전수 조사 및 토스형 Canvas 실시간 구현 (Netlify 배포 규격 통합본)
 
 ## 1. 데이터 분석 및 추출 (Back-end Logic & OCR)
 
@@ -28,13 +28,13 @@
   - 지시선(Polyline)은 반드시 도넛의 '바깥쪽 가장자리'에서 출발하여, 도넛 중앙 구멍을 관통하는 시각적 오류를 원천 차단한다.
   - 카테고리 이름, 퍼센트, 금액을 나타내는 텍스트 라벨과 선들이 절대 서로 겹치지(Overlap) 않아야 하며, 화면 밖으로 잘리지 않도록 SVG ViewBox 여백을 충분히 확보한다.
 
-## 4. AI 소비 분석 기능 (Vercel API 및 환경변수 연동)
+## 4. AI 소비 분석 기능 (Netlify API 및 환경변수 연동)
 
 * 화면 우측 하단에 항상 떠 있는 플로팅 버튼(FAB)을 구현한다.
-* **Vercel 배포 및 보안**: API Key 노출을 방지하기 위해 브라우저에서 직접 Gemini API를 호출하거나 키를 하드코딩하지 않습니다. 대신, 버튼 클릭 시 Vercel 서버리스 백엔드 엔드포인트인 `/api/analyze`로 POST 요청(JSON 페이로드: `{ totalAmount, data }`)을 보내어 Vercel 환경변수(`GEMINI_API_KEY`)를 통해 안전하게 실시간 분석 리포트가 생성되도록 구현하십시오.
-* **안전 폴백(Fallback)**: Vercel 환경변수가 아직 설정되지 않았거나 호출 오류가 발생할 경우에 대비하여, 로딩 스켈레톤 작동 후 즉시 고품질 Mock 소비 분석 리포트(식비, 세금 등 지출에 대한 재무 분석 및 다음 달 절약 팁이 담긴 다정한 한국어 텍스트)를 모달에 띄우는 예외 처리 폴백 로직을 반드시 구성해 줍니다. (로딩 스켈레톤 애니메이션 포함)
+* **Netlify 배포 및 보안**: API Key 노출을 방지하기 위해 브라우저에서 직접 Gemini API를 호출하거나 키를 하드코딩하지 않습니다. 대신, 버튼 클릭 시 Netlify 서버리스 백엔드 엔드포인트인 `/api/analyze`(내부적으로 netlify.toml에 의해 `/.netlify/functions/analyze`로 라우팅됨)로 POST 요청(JSON 페이로드: `{ totalAmount, data }`)을 보내어 Netlify 환경변수(`GEMINI_API_KEY`)를 통해 안전하게 실시간 분석 리포트가 생성되도록 구현하십시오.
+* **안전 폴백(Fallback)**: Netlify 환경변수가 아직 설정되지 않았거나 호출 오류가 발생할 경우에 대비하여, 로딩 스켈레톤 작동 후 즉시 고품질 Mock 소비 분석 리포트(식비, 세금 등 지출에 대한 재무 분석 및 다음 달 절약 팁이 담긴 다정한 한국어 텍스트)를 모달에 띄우는 예외 처리 폴백 로직을 반드시 구성해 줍니다. (로딩 스켈레톤 애니메이션 포함)
 
 ## 5. 최종 출력 제약 (Output Constraint)
 
 * **Strict Output**: 인사말, 로직 설명, 추가적인 확인 질문 등 기타 텍스트는 일절 출력하지 않는다.
-* 위 로직이 모두 반영된 **단일 HTML 파일(React + Babel + Tailwind CDN 포함)** 코드 블록만을 즉시 출력하여, 사용자가 즉각적으로 Canvas(Web UI)를 확인하고 GitHub 저장소에 `index.html` 파일만 푸시해도 Vercel의 환경변수(`GEMINI_API_KEY`)를 이용하여 안전하게 실시간 AI 분석 기능을 쓸 수 있게 완성해 준다.
+* 위 로직이 모두 반영된 **단일 HTML 파일(React + Babel + Tailwind CDN 포함)** 코드 블록만을 즉시 출력하여, 사용자가 즉각적으로 Canvas(Web UI)를 확인하고 GitHub 저장소에 `index.html` 파일만 푸시해도 Netlify의 환경변수(`GEMINI_API_KEY`)를 이용하여 안전하게 실시간 AI 분석 기능을 쓸 수 있게 완성해 준다.
